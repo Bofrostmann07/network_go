@@ -1,4 +1,4 @@
-package maclookup
+package macLookup
 
 import (
 	"bufio"
@@ -21,7 +21,7 @@ type searchedMac struct {
 	vendor       string
 }
 
-var pathIeeeRegister string = "internal/maclookup/IEEE_MAC_register.json"
+var pathIeeeRegister string = "internal/macLookup/IEEE_MAC_register.json"
 
 func DoLookUp() {
 	log.Println("Started MAC address lookup tool")

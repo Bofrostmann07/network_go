@@ -1,9 +1,9 @@
-package eth_int_search
+package ethIntSearch
 
 import (
 	"fmt"
 	"log"
-	"network_go/internal/sshUtil"
+	"network_go/internal/SSHUtil"
 	"regexp"
 	"strings"
 )
@@ -41,7 +41,7 @@ func FetchEthIntConfig(switchInventory *[]NetworkSwitch, config AppConfig) {
 
 func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
 	addr := fmt.Sprintf("%s:%s", networkSwitch.Address, appConfig.SSHPort)
-	rawOutput = sshUtil.ConnectSSH(addr, appConfig.Username, appConfig.Password, command)
+	rawOutput = SSHUtil.ConnectSSH(addr, appConfig.Username, appConfig.Password, command)
 	return rawOutput
 }
 

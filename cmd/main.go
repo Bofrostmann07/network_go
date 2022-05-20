@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"network_go/internal/eth_int_search"
+	"network_go/internal/ethIntSearch"
 	"network_go/internal/inventory"
-	"network_go/internal/maclookup"
+	"network_go/internal/macLookup"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 
 func menu() {
 	for true {
-		appConfig := eth_int_search.AppConfig{
+		appConfig := ethIntSearch.AppConfig{
 			Username: "automate",
 			Password: "automateme",
 			SSHPort:  "22",
@@ -35,9 +35,9 @@ func menu() {
 		switch toolNumber {
 		case 1:
 			switchInventory := inventory.ReadSwitchInventoryFromCSV()
-			eth_int_search.FetchEthIntConfig(&switchInventory, appConfig)
+			ethIntSearch.FetchEthIntConfig(&switchInventory, appConfig)
 		case 2:
-			maclookup.DoLookUp()
+			macLookup.DoLookUp()
 		case 99:
 			println("N/A")
 		default:
