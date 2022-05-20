@@ -2,7 +2,6 @@ package sshUtil
 
 import (
 	"bytes"
-	"fmt"
 	"golang.org/x/crypto/ssh"
 	"log"
 )
@@ -39,6 +38,5 @@ func ConnectSSH(addr, username, password, command string) string {
 	if err2 := session.Run(command); err2 != nil {
 		log.Fatal(err2)
 	}
-	fmt.Println(buff.String())
 	return buff.String()
 }
