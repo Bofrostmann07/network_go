@@ -20,15 +20,10 @@ type NetworkSwitch struct {
 	Address   string
 	Hostname  string
 	Platform  string
+	Group     string
 	Reachable bool
 
 	IntEthConfig map[string][]string
-}
-
-func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
-	addr := fmt.Sprintf("%s:%s", networkSwitch.Address, appConfig.SSHPort)
-	rawOutput = sshUtil.ConnectSSH(addr, appConfig.Username, appConfig.Password, command)
-	return rawOutput
 }
 
 func FetchEthIntConfig(switchInventory *[]NetworkSwitch, config AppConfig) {
@@ -42,6 +37,12 @@ func FetchEthIntConfig(switchInventory *[]NetworkSwitch, config AppConfig) {
 		(*switchInventory)[i].IntEthConfig = parseIntEthConfig(rawOutput)
 	}
 	fmt.Println(switchInventory)
+}
+
+func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
+	addr := fmt.Sprintf("%s:%s", networkSwitch.Address, appConfig.SSHPort)
+	rawOutput = sshUtil.ConnectSSH(addr, appConfig.Username, appConfig.Password, command)
+	return rawOutput
 }
 
 func parseIntEthConfig(rawOutput string) (IntEthConfig map[string][]string) {

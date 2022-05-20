@@ -1,0 +1,4 @@
+hostname,address,platform,group
+sw_reachable1,10.40.0.1,cisco_ios,default
+sw_reachable2,10.30.0.1,cisco_ios,default
+sw_unreach,200.200.200.200,cisco_ios,default
