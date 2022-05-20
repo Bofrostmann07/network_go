@@ -4,17 +4,10 @@ import (
 	"fmt"
 	"log"
 	"network_go/internal/SSHUtil"
+	"network_go/internal/config"
 	"regexp"
 	"strings"
 )
-
-type AppConfig struct {
-	Username string
-	Password string
-	SSHPort  string
-}
-
-var appConfig AppConfig
 
 type NetworkSwitch struct {
 	Address   string
