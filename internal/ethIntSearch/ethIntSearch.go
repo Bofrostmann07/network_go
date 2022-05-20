@@ -3,6 +3,7 @@ package ethIntSearch
 import (
 	"fmt"
 	"log"
+	"net"
 	"network_go/internal/SSHUtil"
 	"network_go/internal/config"
 	"regexp"
@@ -19,22 +20,24 @@ type NetworkSwitch struct {
 	IntEthConfig map[string][]string
 }
 
-func FetchEthIntConfig(switchInventory *[]NetworkSwitch, config AppConfig) {
-	appConfig = config
+func FetchEthIntConfig(switchInventory *[]NetworkSwitch) {
+	CheckConnection(switchInventory)
 	if switchInventory == nil {
 		return
 	}
 
 	for i, networkSwitch := range *switchInventory {
-		rawOutput := sendSingleShowCommand("show derived-config | begin interface", networkSwitch)
-		(*switchInventory)[i].IntEthConfig = parseIntEthConfig(rawOutput)
+		if networkSwitch.Reachable {
+			rawOutput := sendSingleShowCommand("show derived-config | begin interface", networkSwitch)
+			(*switchInventory)[i].IntEthConfig = parseIntEthConfig(rawOutput)
+		}
 	}
 	fmt.Println(switchInventory)
 }
 
 func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
-	addr := fmt.Sprintf("%s:%s", networkSwitch.Address, appConfig.SSHPort)
-	rawOutput = SSHUtil.ConnectSSH(addr, appConfig.Username, appConfig.Password, command)
+	addr := net.JoinHostPort(networkSwitch.Address, config.AppConfig.SSH.Port)
+	rawOutput = SSHUtil.ConnectSSH(addr, config.AppConfig.SSH.Username, config.AppConfig.SSH.Password, command)
 	return rawOutput
 }
 
