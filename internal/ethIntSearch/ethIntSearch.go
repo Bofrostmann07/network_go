@@ -88,7 +88,7 @@ func saveAsJson(switchInventory *[]NetworkSwitch) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fileName := time.Now().Format("2006-01-02T15-04-05 Mon") + ".json"
+	fileName := time.Now().Format("2006-01-02T15-04-05") + ".json"
 	filePath := filepath.Join("./database", fileName)
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0755)
 	if err != nil {
@@ -100,4 +100,10 @@ func saveAsJson(switchInventory *[]NetworkSwitch) {
 		log.Fatalln(err)
 	}
 	defer file.Close()
+
+	absFilePath, err := filepath.Abs(filePath)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("Successfuly saved database @%s", absFilePath)
 }
