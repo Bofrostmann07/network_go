@@ -1,11 +1,12 @@
 package ethIntSearch
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
-	"network_go/internal/SSHUtil"
 	"network_go/internal/config"
+	"network_go/internal/util/sshUtil"
 	"regexp"
 	"strings"
 )
@@ -17,7 +18,12 @@ type NetworkSwitch struct {
 	Group     string
 	Reachable bool
 
-	IntEthConfig map[string][]string
+	IntEthConfig map[string]EthInterface
+}
+
+type EthInterface struct {
+	InterfaceConfig []string
+	macList         []string
 }
 
 func FetchEthIntConfig(switchInventory *[]NetworkSwitch) {
@@ -33,16 +39,21 @@ func FetchEthIntConfig(switchInventory *[]NetworkSwitch) {
 		}
 	}
 	fmt.Println(switchInventory)
+	result, err := json.Marshal(switchInventory)
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Println(string(result))
 }
 
 func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
 	addr := net.JoinHostPort(networkSwitch.Address, config.AppConfig.SSH.Port)
-	rawOutput = SSHUtil.ConnectSSH(addr, config.AppConfig.SSH.Username, config.AppConfig.SSH.Password, command)
+	rawOutput = sshUtil.ConnectSSH(addr, config.AppConfig.SSH.Username, config.AppConfig.SSH.Password, command)
 	return rawOutput
 }
 
-func parseIntEthConfig(rawOutput string) (IntEthConfig map[string][]string) {
-	IntEthConfig = make(map[string][]string)
+func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]EthInterface) {
+	IntEthConfig = make(map[string]EthInterface)
 	pattern := regexp.MustCompile(`(?m)^(interface.*)\n((?:.*\n)+?)!`)
 	parsedOutput := pattern.FindAllStringSubmatch(rawOutput, -1)
 	for _, matches := range parsedOutput {
@@ -60,7 +71,11 @@ func parseIntEthConfig(rawOutput string) (IntEthConfig map[string][]string) {
 		if strings.HasPrefix(interfaceName, "interface Vlan") {
 			continue
 		}
-		IntEthConfig[interfaceName] = interfaceConfig
+		IntEthConfig[interfaceName] = EthInterface{
+			InterfaceConfig: interfaceConfig,
+		}
 	}
 	return IntEthConfig
 }
+
+//TODO check if min 1 switch was reachable and sent data
