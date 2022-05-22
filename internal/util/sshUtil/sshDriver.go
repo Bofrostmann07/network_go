@@ -1,4 +1,4 @@
-package SSHUtil
+package sshUtil
 
 import (
 	"bytes"
