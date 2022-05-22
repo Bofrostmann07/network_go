@@ -15,24 +15,24 @@ import (
 )
 
 type NetworkSwitch struct {
-	Address   string
-	Hostname  string
-	Platform  string
-	Group     string
-	Reachable bool
+	Address   string `json:"Address"`
+	Hostname  string `json:"Hostname"`
+	Platform  string `json:"Platform"`
+	Group     string `json:"Group"`
+	Reachable bool   `json:"Reachable"`
 
 	IntEthConfig map[string]EthInterface
 }
 
 type EthInterface struct {
-	InterfaceConfig []string
-	macList         []string
+	InterfaceConfig []string `json:"InterfaceConfig"`
+	MacList         []string `json:"MacList"`
 }
 
-func FetchEthIntConfig(switchInventory *[]NetworkSwitch) {
+func FetchEthIntConfig(switchInventory *[]NetworkSwitch) *[]NetworkSwitch {
 	CheckConnection(switchInventory)
 	if switchInventory == nil {
-		return
+		return switchInventory
 	}
 
 	for i, networkSwitch := range *switchInventory {
@@ -42,6 +42,7 @@ func FetchEthIntConfig(switchInventory *[]NetworkSwitch) {
 		}
 	}
 	saveAsJson(switchInventory)
+	return switchInventory
 }
 
 func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {

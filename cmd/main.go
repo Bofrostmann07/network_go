@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"network_go/internal/config"
 	"network_go/internal/ethIntSearch"
-	"network_go/internal/inventory"
 	"network_go/internal/macLookup"
 )
 
@@ -35,8 +34,9 @@ func menu() {
 
 		switch toolNumber {
 		case 1:
-			switchInventory := inventory.ReadSwitchInventoryFromCSV()
-			ethIntSearch.FetchEthIntConfig(&switchInventory)
+			ethIntSearch.SwitchSearch()
+			//switchInventory := inventory.ReadSwitchInventoryFromCSV()
+			//ethIntSearch.FetchEthIntConfig(&switchInventory)
 		case 2:
 			macLookup.DoLookUp()
 		case 99:
