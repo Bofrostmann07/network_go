@@ -2,13 +2,16 @@ package ethIntSearch
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"network_go/internal/config"
+	"network_go/internal/util/ioUtil"
 	"network_go/internal/util/sshUtil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type NetworkSwitch struct {
@@ -38,12 +41,7 @@ func FetchEthIntConfig(switchInventory *[]NetworkSwitch) {
 			(*switchInventory)[i].IntEthConfig = parseIntEthConfig(rawOutput)
 		}
 	}
-	fmt.Println(switchInventory)
-	result, err := json.Marshal(switchInventory)
-	if err != nil {
-		fmt.Print(err)
-	}
-	fmt.Println(string(result))
+	saveAsJson(switchInventory)
 }
 
 func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
@@ -79,3 +77,26 @@ func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]EthInterface) 
 }
 
 //TODO check if min 1 switch was reachable and sent data
+
+func saveAsJson(switchInventory *[]NetworkSwitch) {
+	_, err := ioUtil.ExistsDir("./database", true)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	result, err := json.MarshalIndent(switchInventory, "", "\t")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fileName := time.Now().Format("2006-01-02T15-04-05 Mon") + ".json"
+	filePath := filepath.Join("./database", fileName)
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = file.Write(result)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+}
