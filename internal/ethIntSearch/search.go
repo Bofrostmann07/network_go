@@ -13,16 +13,18 @@ import (
 
 func SwitchSearch() {
 	log.Println("Started switch search")
-	getDatabaseData()
+	switchInventory := getDatabaseData()
+	log.Printf("Loaded %d switches", len(switchInventory))
 }
 
-func getDatabaseData() {
+func getDatabaseData() []NetworkSwitch {
 	sortedFileList := getFileListDesc()
 	recentFile := "./database/" + sortedFileList[0].Name()
 	log.Printf("The most recent Datafile is from %s.", recentFile)
 	loadRecentFile := ioUtil.UserInputYesNo("Open most recent file: [y]/n", true)
 	if loadRecentFile {
-		readDatabase(recentFile)
+		switchInventory := readDatabase(recentFile)
+		return switchInventory
 	}
 	//retrieveNow := ioUtil.UserInputYesNo("Retrieve switch config now: [y]/n", true)
 	//if retrieveNow {
@@ -56,15 +58,17 @@ func getFileListDesc() []fs.FileInfo {
 	return files
 }
 
-func readDatabase(file string) {
+func readDatabase(file string) []NetworkSwitch {
 	fileData, err := ioutil.ReadFile(file)
 	if errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("Could not open Database %q", file)
 	}
-	err = json.Unmarshal(fileData, &NetworkSwitch{})
+	var switchInventory []NetworkSwitch
+	err = json.Unmarshal(fileData, &switchInventory)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	return switchInventory
 }
 
 func saveSearchResult() {
