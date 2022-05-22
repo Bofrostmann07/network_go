@@ -1,10 +1,10 @@
 package ethIntSearch
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"network_go/internal/config"
+	"network_go/internal/util/ioUtil"
 	"time"
 )
 
@@ -18,13 +18,15 @@ func CheckConnection(switchInventory *[]NetworkSwitch) {
 	for _, networkSwitch := range *switchInventory {
 		jobs <- networkSwitch
 	}
-	//close(jobs)
+	close(jobs)
 
 	for i := 0; i < len(*switchInventory); i++ {
 		(*switchInventory)[i] = <-results
-		fmt.Println(<-results)
-
+		//fmt.Println(<-results)
 	}
+	close(results)
+
+	userInputIfSwitchesUnreachable(switchInventory)
 }
 
 func worker(jobs <-chan NetworkSwitch, results chan<- NetworkSwitch) {
@@ -44,19 +46,23 @@ func checkConnectivity(networkSwitch NetworkSwitch) NetworkSwitch {
 		networkSwitch.Reachable = true
 	}
 	return networkSwitch
-	//if errorCounter != 0 {
-	//	log.Printf("Couldn't reach %d switches. All unreachable switches will be left out.", errorCounter)
-	//
-	//	var userInput string
-	//	fmt.Print("Continue? [y]/n: ")
-	//	//_, err := fmt.Scanf("\n%s", &userInput) //TODO unexpected newline
-	//	//if err != nil {
-	//	//	fmt.Print(err)
-	//	//}
-	//	fmt.Scanln(&userInput)
-	//	if userInput == "\n" || userInput == "y" {
-	//		log.Println("Continuing with the connection check")
-	//		return
-	//	}
-	//	log.Fatalln("Stopping. Restart the tool after fixing the connection issues.")
+}
+
+func userInputIfSwitchesUnreachable(switchInventory *[]NetworkSwitch) {
+	unreachableCounter := 0
+	for _, networkSwitch := range *switchInventory {
+		if !networkSwitch.Reachable {
+			unreachableCounter++
+		}
+	}
+
+	if unreachableCounter != 0 {
+		log.Printf("Couldn't reach %d switches. All unreachable switches will be left out.", unreachableCounter)
+		userAnswer := ioUtil.UserInputYesNo("Continue? [y]/n: ", true)
+		if userAnswer {
+			log.Println("Continuing with the connection check")
+			return
+		}
+		log.Fatalln("Stopping. Restart the tool after fixing the connection issues.")
+	}
 }
