@@ -28,7 +28,7 @@ func menu() {
 
 		var toolNumber int
 		fmt.Print("Tool number: ")
-		_, err := fmt.Scan(&toolNumber)
+		_, err := fmt.Scanln(&toolNumber)
 		if err != nil {
 			fmt.Print(err)
 		}
