@@ -42,12 +42,12 @@ func validateCSVData(fileData [][]string) [][]string {
 	for i, line := range fileData[1:] {
 		if len(line) < 4 {
 			errorCounter++
-			log.Printf("%v/%v", "Too less arguments on line", i)
+			log.Printf("Too less arguments on line %d", i)
 		}
 		platform := line[2]
 		if platform != "cisco_ios" && platform != "cisco_xe" {
 			errorCounter++
-			log.Printf("%v/%v", "Unsupported platform on line", i)
+			log.Printf("Unsupported platform on line %d", i)
 		}
 	}
 	if errorCounter > 0 {
