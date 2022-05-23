@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"network_go/internal/config"
+	"network_go/internal/models"
 	"network_go/internal/util/ioUtil"
 	"network_go/internal/util/sshUtil"
 	"os"
@@ -14,22 +15,7 @@ import (
 	"time"
 )
 
-type NetworkSwitch struct {
-	Address   string `json:"Address"`
-	Hostname  string `json:"Hostname"`
-	Platform  string `json:"Platform"`
-	Group     string `json:"Group"`
-	Reachable bool   `json:"Reachable"`
-
-	IntEthConfig map[string]EthInterface
-}
-
-type EthInterface struct {
-	InterfaceConfig []string `json:"InterfaceConfig"`
-	MacList         []string `json:"MacList"`
-}
-
-func FetchEthIntConfig(switchInventory *[]NetworkSwitch) *[]NetworkSwitch {
+func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) *[]models.NetworkSwitch {
 	CheckConnection(switchInventory)
 	if switchInventory == nil {
 		return switchInventory
@@ -45,14 +31,14 @@ func FetchEthIntConfig(switchInventory *[]NetworkSwitch) *[]NetworkSwitch {
 	return switchInventory
 }
 
-func sendSingleShowCommand(command string, networkSwitch NetworkSwitch) (rawOutput string) {
+func sendSingleShowCommand(command string, networkSwitch models.NetworkSwitch) (rawOutput string) {
 	addr := net.JoinHostPort(networkSwitch.Address, config.AppConfig.SSH.Port)
 	rawOutput = sshUtil.ConnectSSH(addr, config.AppConfig.SSH.Username, config.AppConfig.SSH.Password, command)
 	return rawOutput
 }
 
-func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]EthInterface) {
-	IntEthConfig = make(map[string]EthInterface)
+func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]models.EthInterface) {
+	IntEthConfig = make(map[string]models.EthInterface)
 	pattern := regexp.MustCompile(`(?m)^(interface.*)\n((?:.*\n)+?)!`)
 	parsedOutput := pattern.FindAllStringSubmatch(rawOutput, -1)
 	for _, matches := range parsedOutput {
@@ -70,7 +56,7 @@ func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]EthInterface) 
 		if strings.HasPrefix(interfaceName, "interface Vlan") {
 			continue
 		}
-		IntEthConfig[interfaceName] = EthInterface{
+		IntEthConfig[interfaceName] = models.EthInterface{
 			InterfaceConfig: interfaceConfig,
 		}
 	}
@@ -79,7 +65,7 @@ func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]EthInterface) 
 
 //TODO check if min 1 switch was reachable and sent data
 
-func saveAsJson(switchInventory *[]NetworkSwitch) {
+func saveAsJson(switchInventory *[]models.NetworkSwitch) {
 	_, err := ioUtil.ExistsDir("./database", true)
 	if err != nil {
 		log.Fatalln(err)

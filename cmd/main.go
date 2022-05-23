@@ -35,8 +35,6 @@ func menu() {
 		switch toolNumber {
 		case 1:
 			ethIntSearch.SwitchSearch()
-			//switchInventory := inventory.ReadSwitchInventoryFromCSV()
-			//ethIntSearch.FetchEthIntConfig(&switchInventory)
 		case 2:
 			macLookup.DoLookUp()
 		case 99:

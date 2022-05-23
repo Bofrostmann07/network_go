@@ -4,11 +4,11 @@ import (
 	"encoding/csv"
 	"fmt"
 	"log"
-	"network_go/internal/ethIntSearch"
+	"network_go/internal/models"
 	"os"
 )
 
-func ReadSwitchInventoryFromCSV() []ethIntSearch.NetworkSwitch {
+func ReadSwitchInventoryFromCSV() []models.NetworkSwitch {
 
 	csvFile, err := os.Open("api/switchInventory.csv")
 	if err != nil {
@@ -24,9 +24,9 @@ func ReadSwitchInventoryFromCSV() []ethIntSearch.NetworkSwitch {
 	}
 	validatedFileData := validateCSVData(fileData)
 
-	switchInventory := make([]ethIntSearch.NetworkSwitch, len(fileData[1:]))
+	switchInventory := make([]models.NetworkSwitch, len(fileData[1:]))
 	for i, line := range validatedFileData[1:] {
-		switchInvData := ethIntSearch.NetworkSwitch{
+		switchInvData := models.NetworkSwitch{
 			Hostname: line[0],
 			Address:  line[1],
 			Platform: line[2],

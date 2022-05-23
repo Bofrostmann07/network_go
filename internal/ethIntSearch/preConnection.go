@@ -4,13 +4,14 @@ import (
 	"log"
 	"net"
 	"network_go/internal/config"
+	"network_go/internal/models"
 	"network_go/internal/util/ioUtil"
 	"time"
 )
 
-func CheckConnection(switchInventory *[]NetworkSwitch) {
-	jobs := make(chan NetworkSwitch, len(*switchInventory))
-	results := make(chan NetworkSwitch, len(*switchInventory))
+func CheckConnection(switchInventory *[]models.NetworkSwitch) {
+	jobs := make(chan models.NetworkSwitch, len(*switchInventory))
+	results := make(chan models.NetworkSwitch, len(*switchInventory))
 
 	for i := 0; i < config.AppConfig.SSH.MaxGoRoutines; i++ {
 		go worker(jobs, results)
@@ -29,13 +30,13 @@ func CheckConnection(switchInventory *[]NetworkSwitch) {
 	userInputIfSwitchesUnreachable(switchInventory)
 }
 
-func worker(jobs <-chan NetworkSwitch, results chan<- NetworkSwitch) {
+func worker(jobs <-chan models.NetworkSwitch, results chan<- models.NetworkSwitch) {
 	for networkSwitch := range jobs {
 		results <- checkConnectivity(networkSwitch)
 	}
 }
 
-func checkConnectivity(networkSwitch NetworkSwitch) NetworkSwitch {
+func checkConnectivity(networkSwitch models.NetworkSwitch) models.NetworkSwitch {
 	timeout := time.Duration(config.AppConfig.SSH.Timeout) * time.Second
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(networkSwitch.Address, config.AppConfig.SSH.Port), timeout)
 	if err != nil {
@@ -48,7 +49,7 @@ func checkConnectivity(networkSwitch NetworkSwitch) NetworkSwitch {
 	return networkSwitch
 }
 
-func userInputIfSwitchesUnreachable(switchInventory *[]NetworkSwitch) {
+func userInputIfSwitchesUnreachable(switchInventory *[]models.NetworkSwitch) {
 	unreachableCounter := 0
 	for _, networkSwitch := range *switchInventory {
 		if !networkSwitch.Reachable {
