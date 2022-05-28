@@ -31,7 +31,7 @@ func DoLookUp() {
 	searchMac := removeDuplicateValues(MacAddressList)
 	searchQuery := newSearchMac(searchMac)
 	searchIeeeRegistry(&searchQuery, ieeeRegistry)
-	log.Println(searchQuery)
+	printResult(&searchQuery)
 }
 
 func checkIeeeRegistry() (ieeeRegistry map[string]string) {
@@ -208,11 +208,9 @@ func searchIeeeRegistry(searchQuery *[]searchedMac, ieeeRegistry map[string]stri
 	log.Printf("Found %d addresses in IEEE MAC Registry.\n", foundEntries)
 }
 
-//func serachInIeeeRegistry(ieeeRegistry map[string]string) (results string) {
-//
-//}
+func printResult(searchQuery *[]searchedMac) {
+	for i, element := range *searchQuery {
+		log.Printf("%d - %s: %s", i, element.sourceMac, element.vendor)
+	}
+}
 
-//read_list := map[string]string{}
-//
-//json.Unmarshal([]byte(jsonString), &read_list)
-//fmt.Println(read_list)
