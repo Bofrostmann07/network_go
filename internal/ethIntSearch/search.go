@@ -9,6 +9,7 @@ import (
 	"log"
 	"network_go/internal/inventory"
 	"network_go/internal/models"
+	"network_go/internal/parser"
 	"network_go/internal/util/ioUtil"
 	"os"
 	"sort"
@@ -26,6 +27,10 @@ func SwitchSearch() {
 		"--u     Tries to strip off uplink interfaces\n" +
 		"Example: \"switchport mode access\" --n --u\n")
 
+	fmt.Print("Query: ")
+	searchQuery := ioUtil.ReadLine()
+
+	querySearch(searchQuery, &switchInventory)
 }
 
 func getDatabaseData() []models.NetworkSwitch {
@@ -84,6 +89,23 @@ func readDatabase(file string) []models.NetworkSwitch {
 		log.Fatalln(err)
 	}
 	return switchInventory
+}
+
+func querySearch(query string, switchinventory *[]models.NetworkSwitch) string {
+	parsedQuery, err := parser.ParseQuery(query)
+	if err != nil {
+		log.Fatalln("Query not parsable. ", err)
+	}
+	var result []models.NetworkSwitch
+	for _, networkSwitch := range *switchinventory {
+		matches := networkSwitch.EvaluateQuery(parsedQuery)
+		if matches {
+			result = append(result, networkSwitch)
+		}
+	}
+	fmt.Println(result)
+	fmt.Printf("Found %d switches.\n", len(result))
+	return ""
 }
 
 func saveSearchResult() {
