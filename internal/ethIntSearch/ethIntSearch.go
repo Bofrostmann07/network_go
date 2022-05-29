@@ -24,7 +24,7 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) *[]models.Networ
 	for i, networkSwitch := range *switchInventory {
 		if networkSwitch.Reachable {
 			rawOutput := sendSingleShowCommand("show derived-config | begin interface", networkSwitch)
-			(*switchInventory)[i].IntEthConfig = parseIntEthConfig(rawOutput)
+			(*switchInventory)[i].EthInterfaces = parseIntEthConfig(rawOutput)
 		}
 	}
 	saveAsJson(switchInventory)
@@ -43,7 +43,7 @@ func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]models.EthInte
 	parsedOutput := pattern.FindAllStringSubmatch(rawOutput, -1)
 	for _, matches := range parsedOutput {
 		if len(matches) < 3 {
-			log.Println("Could not parse IntEthConfig!")
+			log.Println("Could not parse EthInterfaces!")
 		}
 		interfaceName := matches[1]
 		interfaceName = strings.TrimSpace(interfaceName)

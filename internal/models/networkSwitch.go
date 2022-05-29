@@ -7,7 +7,7 @@ type NetworkSwitch struct {
 	Group     string `json:"Group"`
 	Reachable bool   `json:"Reachable"`
 
-	IntEthConfig map[string]EthInterface
+	EthInterfaces map[string]EthInterface `json:"EthInterfaces"`
 }
 
 type EthInterface struct {
