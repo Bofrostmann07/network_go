@@ -15,10 +15,10 @@ import (
 	"time"
 )
 
-func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) *[]models.NetworkSwitch {
+func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 	CheckConnection(switchInventory)
 	if switchInventory == nil {
-		return switchInventory
+		return
 	}
 
 	for i, networkSwitch := range *switchInventory {
@@ -28,7 +28,6 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) *[]models.Networ
 		}
 	}
 	saveAsJson(switchInventory)
-	return switchInventory
 }
 
 func sendSingleShowCommand(command string, networkSwitch models.NetworkSwitch) (rawOutput string) {
