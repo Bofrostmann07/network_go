@@ -1,0 +1,28 @@
+/* Lexical part */
+!whitespace : ' ' | '\t' | '\n' | '\r';
+bucket : 'a'-'z' {'a'-'z'};
+_operator_value : '=' | '~';
+operator : ['!'] _operator_value;
+
+_string_alphabet : 'a'-'z' | 'A'-'Z' | '0'-'9' | '-' | '.' | '!' | '?' | '_' | ':' | '/' | ' ';
+_string : _string_alphabet {_string_alphabet};
+matter : '"' _string '"';
+
+/* Syntax part*/
+<< import "network_go/internal/parser/ast" >>
+
+Query
+    : FieldQuery AndQuery << ast.NewAndQuery($0, $1) >>
+    | FieldQuery OrQuery << ast.NewOrQuery($0, $1) >>
+    | FieldQuery
+    ;
+
+OrQuery : "|" Query << $1.(*ast.Query), nil >>;
+AndQuery: "&" Query  << $1.(*ast.Query), nil >>;
+
+Field : bucket operator matter << ast.NewField($0,$1,$2) >> ;
+
+FieldQuery
+    : "(" Query ")" << $1.(*ast.Query), nil >>
+    | Field << ast.NewFieldQuery($0) >>
+    ;
