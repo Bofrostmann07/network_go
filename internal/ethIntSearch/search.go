@@ -47,7 +47,7 @@ func getDatabaseData() []models.NetworkSwitch {
 	if retrieveNow {
 		switchInventory := inventory.ReadSwitchInventoryFromCSV()
 		fetchEthIntConfig(&switchInventory)
-		return nil //TODO this is wrong...
+		return switchInventory
 	}
 
 	log.Println("List of 10 recent files @./database:")
