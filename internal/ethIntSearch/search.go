@@ -34,7 +34,12 @@ func SwitchSearch() {
 }
 
 func getDatabaseData() []models.NetworkSwitch {
-	sortedFileList := getFileListDesc()
+	sortedFileList, err := getFileListDesc()
+	if err != nil {
+		switchInventory := inventory.ReadSwitchInventoryFromCSV()
+		fetchEthIntConfig(&switchInventory)
+		return switchInventory
+	}
 	recentFile := "./database/" + sortedFileList[0].Name()
 	log.Printf("The most recent Datafile is from %s.", recentFile)
 	loadRecentFile := ioUtil.UserInputYesNo("Open most recent file? [y]/n: ", true)
