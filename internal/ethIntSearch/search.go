@@ -54,12 +54,8 @@ func getDatabaseData() []models.NetworkSwitch {
 	for i := 0; i < 10; i++ {
 		log.Println(sortedFileList[i].Name())
 	}
-	var selectedFile string
 	fmt.Print("Select file: ")
-	_, err := fmt.Scanln(&selectedFile)
-	if err != nil {
-		fmt.Print(err)
-	}
+	selectedFile := ioUtil.ReadLine()
 	switchInventory := readDatabase(selectedFile)
 	return switchInventory
 }
