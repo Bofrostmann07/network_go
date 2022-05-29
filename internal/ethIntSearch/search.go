@@ -64,10 +64,14 @@ func getDatabaseData() []models.NetworkSwitch {
 	return switchInventory
 }
 
-func getFileListDesc() []fs.FileInfo {
+func getFileListDesc() ([]fs.FileInfo, error) {
 	files, err := ioutil.ReadDir("./database")
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if len(files) == 0 {
+		return []fs.FileInfo{}, errors.New("no files found")
 	}
 
 	// descending order
@@ -75,7 +79,7 @@ func getFileListDesc() []fs.FileInfo {
 		func(i, j int) bool {
 			return files[i].ModTime().After(files[j].ModTime())
 		})
-	return files
+	return files, nil
 }
 
 func readDatabase(file string) []models.NetworkSwitch {
