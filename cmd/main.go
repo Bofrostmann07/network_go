@@ -5,6 +5,7 @@ import (
 	"network_go/internal/config"
 	"network_go/internal/ethIntSearch"
 	"network_go/internal/macLookup"
+	"network_go/internal/util/ioUtil"
 )
 
 func main() {
@@ -25,19 +26,17 @@ func menu() {
 			"99 - Show Config Values (global_config.yml)",
 		)
 
-		var toolNumber int
+		//var toolNumber int
 		fmt.Print("Tool number: ")
-		_, err := fmt.Scanln(&toolNumber)
-		if err != nil {
-			fmt.Print(err)
-		}
+		//_, err := fmt.Scanln(&toolNumber)
+		toolNumber := ioUtil.ReadLine()
 
 		switch toolNumber {
-		case 1:
+		case "1":
 			ethIntSearch.SwitchSearch()
-		case 2:
+		case "2":
 			macLookup.DoLookUp()
-		case 99:
+		case "99":
 			println("N/A")
 		default:
 			println("Invalid tool number.")

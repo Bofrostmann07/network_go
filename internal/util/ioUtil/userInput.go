@@ -51,3 +51,7 @@ func posString(slice []string, element string) int {
 func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
+
+func ReadLine() string {
+	return input()
+}
