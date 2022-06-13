@@ -61,5 +61,7 @@ func getConfigFromFile() {
 	}
 }
 
-
-
+//TODO: -Check if 'appConfig.yml' exists
+//TODO: If not existing: Generate appConfigTEMPLATE.yml --> Tell user to override the new config file with user values + delete the prefix 'TEMPLATE' -> Exit Program
+//TODO: Check if 'appConfig.yml' has the right version
+//TODO: If version is old: Generate appConfigTEMPLATE.yml and tell user to override the new config file with user values + delete the prefix 'TEMPLATE' -> Exit Program
