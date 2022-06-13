@@ -30,7 +30,16 @@ func SwitchSearch() {
 	fmt.Print("Query: ")
 	searchQuery := ioUtil.ReadLine()
 
-	querySearch(searchQuery, &switchInventory)
+	matchedSwitches, notMatchedSwitches := querySearch(searchQuery, &switchInventory)
+
+	fmt.Print("Filter: ")
+	filterQuery := ioUtil.ReadLine()
+
+	filteredNetworkSwitches, notFilterMatchedSwitches := filterInterfaces(filterQuery, &matchedSwitches)
+	notMatchedSwitches = append(notMatchedSwitches, notFilterMatchedSwitches...)
+
+	fmt.Printf("Matched %d switches.", len(filteredNetworkSwitches))
+	fmt.Printf("No interfaces matched for %d switches.\n", len(notMatchedSwitches))
 }
 
 func getDatabaseData() []models.NetworkSwitch {
@@ -96,21 +105,53 @@ func readDatabase(file string) []models.NetworkSwitch {
 	return switchInventory
 }
 
-func querySearch(query string, switchinventory *[]models.NetworkSwitch) string {
+// querySearch searches the switch inventory for the given search query.
+func querySearch(query string, switchinventory *[]models.NetworkSwitch) (matched, notMatched []models.NetworkSwitch) {
 	parsedQuery, err := parser.ParseQuery(query)
 	if err != nil {
 		log.Fatalln("Query not parsable. ", err)
 	}
-	var result []models.NetworkSwitch
+
 	for _, networkSwitch := range *switchinventory {
 		matches := networkSwitch.EvaluateQuery(parsedQuery)
 		if matches {
-			result = append(result, networkSwitch)
+			matched = append(matched, networkSwitch)
+		} else {
+			notMatched = append(notMatched, networkSwitch)
 		}
 	}
-	fmt.Println(result)
-	fmt.Printf("Found %d switches.\n", len(result))
-	return ""
+	fmt.Println(matched)
+	fmt.Printf("Found %d switches.\n", len(matched))
+
+	return matched, notMatched
+}
+
+func filterInterfaces(query string, switchinventory *[]models.NetworkSwitch) (matchedSwitches, noMatch []models.NetworkSwitch) {
+	parsedQuery, err := parser.ParseQuery(query)
+	if err != nil {
+		log.Fatalln("Query not parsable. ", err)
+	}
+
+	for _, networkSwitch := range *switchinventory {
+		newInterfaces := make(map[string]models.EthInterface)
+		// For each network interface, check if the interface matches the query.
+		for key, networkInterface := range networkSwitch.EthInterfaces {
+			matches := networkInterface.EvaluateQuery(parsedQuery)
+			if matches {
+				newInterfaces[key] = networkInterface
+			}
+		}
+		networkSwitch.EthInterfaces = newInterfaces
+
+		if len(newInterfaces) > 0 {
+			matchedSwitches = append(matchedSwitches, networkSwitch)
+		} else {
+			noMatch = append(noMatch, networkSwitch)
+		}
+	}
+
+	fmt.Println(matchedSwitches)
+	return matchedSwitches, noMatch
 }
 
 func saveSearchResult() {

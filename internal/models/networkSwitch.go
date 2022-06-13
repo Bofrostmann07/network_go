@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 	"network_go/internal/parser/ast"
 	"strconv"
@@ -32,6 +31,35 @@ func (e EthInterface) Search(field ast.Field) bool {
 	return false
 }
 
+func (e EthInterface) EvaluateQuery(query *ast.Query) bool {
+	matches := e.Search(*query.Field)
+
+	// TODO handle nil query
+
+	// No additional queries - Field only
+	if query.AndQuery == nil && query.OrQuery == nil {
+		return matches
+	}
+
+	// Both Queries
+	if query.AndQuery != nil && query.OrQuery != nil {
+		return (matches && e.EvaluateQuery(query.AndQuery)) || e.EvaluateQuery(query.OrQuery)
+	}
+
+	// And Query
+	if query.AndQuery != nil {
+		return matches && e.EvaluateQuery(query.AndQuery)
+	}
+
+	// Or Query
+	if query.OrQuery != nil {
+		return matches || e.EvaluateQuery(query.OrQuery)
+	}
+
+	fmt.Printf("Uncaught state - %v\n", query)
+	return false
+}
+
 func (n NetworkSwitch) Search(field ast.Field) bool {
 	var searchString string
 
@@ -58,27 +86,10 @@ func (n NetworkSwitch) Search(field ast.Field) bool {
 			return false
 		}
 
-		//n.EthInterfaces = newEthInterfaces
 		return true
 	}
 
 	return field.SearchString(searchString)
-}
-
-func (n NetworkSwitch) filterInterfaceData(field ast.Field) (*NetworkSwitch, error) {
-	newEthInterfaces := make(map[string]EthInterface)
-
-	for s, ethInterface := range n.EthInterfaces {
-		if field.SearchStringSlice(ethInterface.MacList) {
-			newEthInterfaces[s] = ethInterface
-		}
-	}
-	if len(newEthInterfaces) == 0 {
-		return nil, errors.New("no match found")
-	}
-
-	n.EthInterfaces = newEthInterfaces
-	return &n, nil
 }
 
 func (n NetworkSwitch) EvaluateQuery(query *ast.Query) (matches bool) {
