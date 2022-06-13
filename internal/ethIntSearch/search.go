@@ -118,27 +118,32 @@ func querySearch(query string, switchinventory *[]models.NetworkSwitch) []models
 	return result
 }
 
-func filterInterfaces(query string, switchinventory *[]models.NetworkSwitch) []models.NetworkSwitch {
+func filterInterfaces(query string, switchinventory *[]models.NetworkSwitch) (matchedSwitches, noMatch []models.NetworkSwitch) {
 	parsedQuery, err := parser.ParseQuery(query)
 	if err != nil {
 		log.Fatalln("Query not parsable. ", err)
 	}
 
-	result := make(map[string]models.EthInterface)
 	for _, networkSwitch := range *switchinventory {
+		newInterfaces := make(map[string]models.EthInterface)
 		// For each network interface, check if the interface matches the query.
 		for key, networkInterface := range networkSwitch.EthInterfaces {
 			matches := networkInterface.EvaluateQuery(parsedQuery)
 			if matches {
-				result[key] = networkInterface
+				newInterfaces[key] = networkInterface
 			}
 		}
-		networkSwitch.EthInterfaces = result
+		networkSwitch.EthInterfaces = newInterfaces
+
+		if len(newInterfaces) > 0 {
+			matchedSwitches = append(matchedSwitches, networkSwitch)
+		} else {
+			noMatch = append(noMatch, networkSwitch)
+		}
 	}
 
-	fmt.Println(result)
-	fmt.Printf("Found %d switches.\n", len(result))
-	return *switchinventory
+	fmt.Println(matchedSwitches)
+	return matchedSwitches, noMatch
 }
 
 func saveSearchResult() {
