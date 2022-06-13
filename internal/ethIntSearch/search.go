@@ -101,21 +101,24 @@ func readDatabase(file string) []models.NetworkSwitch {
 }
 
 // querySearch searches the switch inventory for the given search query.
-func querySearch(query string, switchinventory *[]models.NetworkSwitch) []models.NetworkSwitch {
+func querySearch(query string, switchinventory *[]models.NetworkSwitch) (matched, notMatched []models.NetworkSwitch) {
 	parsedQuery, err := parser.ParseQuery(query)
 	if err != nil {
 		log.Fatalln("Query not parsable. ", err)
 	}
-	var result []models.NetworkSwitch
+
 	for _, networkSwitch := range *switchinventory {
 		matches := networkSwitch.EvaluateQuery(parsedQuery)
 		if matches {
-			result = append(result, networkSwitch)
+			matched = append(matched, networkSwitch)
+		} else {
+			notMatched = append(notMatched, networkSwitch)
 		}
 	}
-	fmt.Println(result)
-	fmt.Printf("Found %d switches.\n", len(result))
-	return result
+	fmt.Println(matched)
+	fmt.Printf("Found %d switches.\n", len(matched))
+
+	return matched, notMatched
 }
 
 func filterInterfaces(query string, switchinventory *[]models.NetworkSwitch) (matchedSwitches, noMatch []models.NetworkSwitch) {
