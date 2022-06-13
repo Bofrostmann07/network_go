@@ -32,6 +32,35 @@ func (e EthInterface) Search(field ast.Field) bool {
 	return false
 }
 
+func (e EthInterface) EvaluateQuery(query *ast.Query) bool {
+	matches := e.Search(*query.Field)
+
+	// TODO handle nil query
+
+	// No additional queries - Field only
+	if query.AndQuery == nil && query.OrQuery == nil {
+		return matches
+	}
+
+	// Both Queries
+	if query.AndQuery != nil && query.OrQuery != nil {
+		return (matches && e.EvaluateQuery(query.AndQuery)) || e.EvaluateQuery(query.OrQuery)
+	}
+
+	// And Query
+	if query.AndQuery != nil {
+		return matches && e.EvaluateQuery(query.AndQuery)
+	}
+
+	// Or Query
+	if query.OrQuery != nil {
+		return matches || e.EvaluateQuery(query.OrQuery)
+	}
+
+	fmt.Printf("Uncaught state - %v\n", query)
+	return false
+}
+
 func (n NetworkSwitch) Search(field ast.Field) bool {
 	var searchString string
 
