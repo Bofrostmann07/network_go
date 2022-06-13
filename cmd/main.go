@@ -25,10 +25,7 @@ func menu() {
 			"2 - MAC address batch lookup\n" +
 			"99 - Show Config Values (global_config.yml)",
 		)
-
-		//var toolNumber int
 		fmt.Print("Tool number: ")
-		//_, err := fmt.Scanln(&toolNumber)
 		toolNumber := ioUtil.ReadLine()
 
 		switch toolNumber {
@@ -37,7 +34,7 @@ func menu() {
 		case "2":
 			macLookup.DoLookUp()
 		case "99":
-			println("N/A")
+			fmt.Printf("%+v\n", config.AppConfig)
 		default:
 			println("Invalid tool number.")
 		}
