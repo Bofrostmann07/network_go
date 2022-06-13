@@ -14,10 +14,7 @@ func main() {
 }
 
 func menu() {
-	_, err := config.ReadConfig()
-	if err != nil {
-		return
-	}
+	config.ReadConfig()
 
 	for true {
 		fmt.Println("Please choose the Tool by number:\n" +

@@ -2,8 +2,9 @@ package config
 
 import (
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"log"
+	"network_go/internal/util/ioUtil"
+	"os"
 )
 
 var pathToConfigFile = "configs/appConfig.yml"
@@ -30,37 +31,35 @@ type Config struct {
 	MacAddressLookup struct {
 		ApiToken string `yaml:"api_token_macvendors"`
 	} `yaml:"mac_address_lookup"`
+	SystemValues struct {
+		AppConfigVersion string `yaml:"app_config_version"`
+	} `yaml:"system_values"`
 }
 
-func ReadConfig() (Config, error) {
-	conf, parseErr := parseConfigFromFile()
-	if parseErr != nil {
-		log.Fatalln("Error while parsing yaml file:", parseErr)
-	}
-	AppConfig = conf
-	return conf, nil
-}
-
-func parseConfigFromFile() (Config, error) {
-	yamlFileContent, readErr := ioutil.ReadFile(pathToConfigFile)
-	if readErr != nil {
-		return Config{}, readErr
-	}
-
-	conf, parseErr := parseConfigFromBytes(yamlFileContent)
-	if parseErr != nil {
-		return Config{}, parseErr
-	}
-	return conf, nil
-}
-
-func parseConfigFromBytes(data []byte) (Config, error) {
-	var config Config
-
-	err := yaml.Unmarshal(data, &config)
+func ReadConfig() {
+	// Create directory 'configs', if it's not existing
+	_, err := ioUtil.ExistsDir("./configs", true)
 	if err != nil {
-		return config, err
+		log.Fatalln("Could not create configs directory.")
 	}
 
-	return config, nil
+	getConfigFromFile()
 }
+
+func getConfigFromFile() {
+	appConfigFile, readErr := os.ReadFile(pathToConfigFile)
+	if os.IsNotExist(readErr) {
+		log.Fatalln("Error while reading yaml file: ", readErr)
+	}
+	if readErr != nil {
+		log.Fatalln("Error while reading yaml file: ", readErr)
+	}
+
+	parseErr := yaml.Unmarshal(appConfigFile, &AppConfig)
+	if parseErr != nil {
+		log.Fatalln("Error while unmarshalling yaml file: ", parseErr)
+	}
+}
+
+
+
