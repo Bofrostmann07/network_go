@@ -86,7 +86,6 @@ func (n NetworkSwitch) Search(field ast.Field) bool {
 			return false
 		}
 
-		//n.EthInterfaces = newEthInterfaces
 		return true
 	}
 
