@@ -1,0 +1,28 @@
+--- # Global Config
+#Possible values: csv, prime
+input_source: csv
+debug_mode: false
+ssh_config:
+    ssh_username:
+    ssh_password:
+    ssh_port: 22
+    ssh_timeout: 2
+    max_threads: 25
+    skip_ssh_reachability_check: false
+    skip_ssh_authentication_check: false
+
+# Set values for this config, if you want to use Cisco Prime Infrastructure as your input source. Don't forget to change 'input_source' in the global_config.
+prime_config:
+    username:
+    password:
+    address:
+    group:
+
+# Get your personal API token from https://macvendors.com/register.
+mac_address_lookup:
+    api_token_macvendors:
+
+#Do not change these values
+system_values:
+    app_config_version: 1
+
