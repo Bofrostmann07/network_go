@@ -30,11 +30,16 @@ func SwitchSearch() {
 	fmt.Print("Query: ")
 	searchQuery := ioUtil.ReadLine()
 
-	newNetworkSwitches := querySearch(searchQuery, &switchInventory)
+	matchedSwitches, notMatchedSwitches := querySearch(searchQuery, &switchInventory)
 
 	fmt.Print("Filter: ")
 	filterQuery := ioUtil.ReadLine()
-	newNetworkSwitches = filterInterfaces(filterQuery, &newNetworkSwitches)
+
+	filteredNetworkSwitches, notFilterMatchedSwitches := filterInterfaces(filterQuery, &matchedSwitches)
+	notMatchedSwitches = append(notMatchedSwitches, notFilterMatchedSwitches...)
+
+	fmt.Printf("Matched %d switches.", len(filteredNetworkSwitches))
+	fmt.Printf("No interfaces matched for %d switches.\n", len(notMatchedSwitches))
 }
 
 func getDatabaseData() []models.NetworkSwitch {
