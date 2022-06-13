@@ -65,6 +65,22 @@ func (n NetworkSwitch) Search(field ast.Field) bool {
 	return field.SearchString(searchString)
 }
 
+func (n NetworkSwitch) filterInterfaceData(field ast.Field) (*NetworkSwitch, error) {
+	newEthInterfaces := make(map[string]EthInterface)
+
+	for s, ethInterface := range n.EthInterfaces {
+		if field.SearchStringSlice(ethInterface.MacList) {
+			newEthInterfaces[s] = ethInterface
+		}
+	}
+	if len(newEthInterfaces) == 0 {
+		return nil, errors.New("no match found")
+	}
+
+	n.EthInterfaces = newEthInterfaces
+	return &n, nil
+}
+
 func (n NetworkSwitch) EvaluateQuery(query *ast.Query) (matches bool) {
 	matches = n.Search(*query.Field)
 
