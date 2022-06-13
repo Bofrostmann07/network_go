@@ -112,11 +112,26 @@ func (f Field) SearchString(input string) bool {
 }
 
 func (f Field) SearchStringSlice(input []string) bool {
-	for _, s := range input {
-		if f.SearchString(s) {
-			return true
-		}
+	if len(input) == 0 {
+		return f.Operator == "!=" || f.Operator == "!~"
 	}
+
+	if f.Operator == "=" || f.Operator == "~" {
+		for _, s := range input {
+			if f.SearchString(s) {
+				return true
+			}
+		}
+		return false
+	} else if f.Operator == "!=" || f.Operator == "!~" {
+		for _, s := range input {
+			if !f.SearchString(s) {
+				return false
+			}
+		}
+		return true
+	}
+
 	return false
 }
 
