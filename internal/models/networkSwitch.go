@@ -23,9 +23,9 @@ type EthInterface struct {
 
 func (e EthInterface) Search(field ast.Field) bool {
 	switch field.Bucket {
-	case "interface":
+	case "config":
 		return field.SearchStringSlice(e.InterfaceConfig)
-	case "mac":
+	case "maclist":
 		return field.SearchStringSlice(e.MacList)
 	}
 	return false
