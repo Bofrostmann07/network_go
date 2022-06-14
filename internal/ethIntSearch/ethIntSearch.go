@@ -83,6 +83,8 @@ func parseIntEthConfig(rawOutput string) (IntEthConfig map[string]models.EthInte
 		if strings.HasPrefix(interfaceName, "interface Vlan") {
 			continue
 		}
+
+		interfaceName = strings.TrimLeft(interfaceName, "interface ")
 		IntEthConfig[interfaceName] = models.EthInterface{
 			InterfaceConfig: interfaceConfig,
 		}
