@@ -12,7 +12,9 @@ import (
 	"network_go/internal/parser"
 	"network_go/internal/util/ioUtil"
 	"os"
+	"path/filepath"
 	"sort"
+	"time"
 )
 
 func SwitchSearch() {
@@ -40,6 +42,8 @@ func SwitchSearch() {
 
 	fmt.Printf("Matched %d switches.", len(filteredNetworkSwitches))
 	fmt.Printf("No interfaces matched for %d switches.\n", len(notMatchedSwitches))
+
+	asaveAsJson(filteredNetworkSwitches, notMatchedSwitches)
 }
 
 func getDatabaseData() []models.NetworkSwitch {
@@ -154,6 +158,53 @@ func filterInterfaces(query string, switchinventory *[]models.NetworkSwitch) (ma
 	return matchedSwitches, noMatch
 }
 
-func saveSearchResult() {
+func asaveAsJson(filteredSwitchList []models.NetworkSwitch, notMatchedSwitchList []models.NetworkSwitch) {
+	_, err := ioUtil.ExistsDir("./results", true)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	result, err := json.MarshalIndent(filteredSwitchList, "", "\t")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	result2, err := json.MarshalIndent(notMatchedSwitchList, "", "\t")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fileName := time.Now().Format("2006-01-02T15-04-05") + ".json"
+	filePath := filepath.Join("./results", fileName)
+	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = file.Write([]byte("Matched switches:\n"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = file.Write(result)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = file.Write([]byte("\n\n\nNot matched switches:\n"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = file.Write(result2)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer file.Close()
+
+	absFilePath, err := filepath.Abs(filePath)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("Successfuly saved database @%s", absFilePath)
 }
