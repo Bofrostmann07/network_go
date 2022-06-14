@@ -18,7 +18,7 @@ import (
 func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 	CheckConnection(switchInventory)
 	if switchInventory == nil {
-		return
+		log.Fatalln("Couldn't reach any switch")
 	}
 
 	for i, networkSwitch := range *switchInventory {
