@@ -53,7 +53,7 @@ func validateCSVData(fileData [][]string) [][]string {
 	if errorCounter > 0 {
 		log.Fatalln("Invalid CSV data. Fix the listed issues to proceed with the program.")
 	}
-	log.Printf("CSV data is valid. Found %d switches.", len(fileData))
+	log.Printf("CSV data is valid. Found %d switches.", len(fileData[1:]))
 	return fileData
 }
 
