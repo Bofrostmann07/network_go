@@ -37,7 +37,7 @@ func SwitchSearch() {
 	filteredNetworkSwitches, notFilterMatchedSwitches := filterInterfaces(filterQuery, &matchedSwitches)
 	notMatchedSwitches = append(notMatchedSwitches, notFilterMatchedSwitches...)
 
-	fmt.Printf("Matched %d switches.", len(filteredNetworkSwitches))
+	fmt.Printf("Matched %d switches.\n", len(filteredNetworkSwitches))
 	fmt.Printf("No interfaces matched for %d switches.\n", len(notMatchedSwitches))
 
 	asaveAsJson(filteredNetworkSwitches, notMatchedSwitches)
