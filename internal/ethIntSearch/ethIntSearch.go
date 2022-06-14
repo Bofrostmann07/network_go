@@ -2,6 +2,7 @@ package ethIntSearch
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"network_go/internal/config"
@@ -21,13 +22,40 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 		log.Fatalln("Couldn't reach any switch")
 	}
 
-	for i, networkSwitch := range *switchInventory {
+	// Filter all unreachable switches out
+	var reachableSwitchList []models.NetworkSwitch
+	for _, networkSwitch := range *switchInventory {
 		if networkSwitch.Reachable {
-			rawOutput := sendSingleShowCommand("show derived-config | begin interface", networkSwitch)
-			(*switchInventory)[i].EthInterfaces = parseIntEthConfig(rawOutput)
+			reachableSwitchList = append(reachableSwitchList, networkSwitch)
 		}
 	}
+
+	jobs := make(chan models.NetworkSwitch, len(reachableSwitchList))
+	results := make(chan map[string]models.EthInterface, len(reachableSwitchList))
+	command := "show config"
+	for i := 0; i < config.AppConfig.SSH.MaxGoRoutines; i++ {
+		go worker2(jobs, command, results)
+	}
+	for _, networkSwitch := range reachableSwitchList {
+		jobs <- networkSwitch
+	}
+	close(jobs)
+
+	for i := 0; i < len(reachableSwitchList); i++ {
+		(*switchInventory)[i].EthInterfaces = <-results
+		fmt.Println(<-results)
+	}
+	close(results)
+
 	saveAsJson(switchInventory)
+}
+
+func worker2(jobs <-chan models.NetworkSwitch, command string, results chan<- map[string]models.EthInterface) {
+	for networkSwitch := range jobs {
+		rawOutput := sendSingleShowCommand(command, networkSwitch)
+		results <- parseIntEthConfig(rawOutput)
+
+	}
 }
 
 func sendSingleShowCommand(command string, networkSwitch models.NetworkSwitch) (rawOutput string) {
