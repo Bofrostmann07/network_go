@@ -22,19 +22,16 @@ func SwitchSearch() {
 	switchInventory := getDatabaseData()
 	log.Printf("Loaded %d switches", len(switchInventory))
 
-	fmt.Printf("Usage: \"[search mask]\" [flags]\n" +
-		"Flags/Options:\n" +
-		"--n     Turn to negative search mode. Will list all interfaces, which wont fit the search mask.\n" +
-		"--o     Tries to strip off out-of-band-management interfaces\n" +
-		"--u     Tries to strip off uplink interfaces\n" +
-		"Example: \"switchport mode access\" --n --u\n")
+	fmt.Printf("Usage: [key] [comparison operator] \"[value]\"\n" +
+		"Example: (address ~ \"10.1\" | address ~ \"10.20\") & group = \"production\"\n" +
+		"For an in-depth description of the query language visit 'https://github.com/Bofrostmann07/network_go'\n")
 
-	fmt.Print("Query: ")
+	fmt.Print("Switch query: ")
 	searchQuery := ioUtil.ReadLine()
 
 	matchedSwitches, notMatchedSwitches := querySearch(searchQuery, &switchInventory)
 
-	fmt.Print("Filter: ")
+	fmt.Print("Interface filter: ")
 	filterQuery := ioUtil.ReadLine()
 
 	filteredNetworkSwitches, notFilterMatchedSwitches := filterInterfaces(filterQuery, &matchedSwitches)
