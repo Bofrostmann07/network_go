@@ -39,4 +39,7 @@ func ConnectSSH(addr, username, password, command string) string {
 		log.Fatal(err2)
 	}
 	return buff.String()
+	if len(output) == 0 {
+		log.Printf("Error: Empty SSH output for %s\n", addr)
+	}
 }
