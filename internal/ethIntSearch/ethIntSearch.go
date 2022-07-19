@@ -31,7 +31,7 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 
 	jobs := make(chan models.NetworkSwitch, len(reachableSwitchList))
 	results := make(chan map[string]models.EthInterface, len(reachableSwitchList))
-	command := "show config"
+	command := "show run | begin interface"
 	for i := 0; i < config.AppConfig.SSH.MaxGoRoutines; i++ {
 		go worker2(jobs, command, results)
 	}
