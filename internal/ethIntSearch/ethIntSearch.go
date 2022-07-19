@@ -2,7 +2,6 @@ package ethIntSearch
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net"
 	"network_go/internal/config"
@@ -43,7 +42,7 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 
 	for i := 0; i < len(reachableSwitchList); i++ {
 		(*switchInventory)[i].EthInterfaces = <-results
-		fmt.Println(<-results)
+		//fmt.Println((*switchInventory)[i].EthInterfaces)
 	}
 	close(results)
 
