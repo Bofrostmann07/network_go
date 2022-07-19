@@ -1,7 +1,6 @@
 package sshUtil
 
 import (
-	"bytes"
 	"golang.org/x/crypto/ssh"
 	"log"
 )
@@ -33,13 +32,23 @@ func ConnectSSH(addr, username, password, command string) string {
 	}
 	defer session.Close()
 
-	var buff bytes.Buffer
-	session.Stdout = &buff
-	if err2 := session.Run(command); err2 != nil {
+	//var buffStdOut, buffStdErr bytes.Buffer
+	//session.Stdout = &buffStdOut
+	//session.Stderr = &buffStdErr
+	//if err2 := session.Run(command); err2 != nil {
+	//	log.Fatal(err2)
+	//}
+	//if buffStdErr.Len() != 0 {
+	//	log.Printf("SSH Stderr: %s\n", buffStdErr.String())
+	//}
+	//
+	//return buffStdOut.String()
+	output, err2 := session.CombinedOutput(command)
+	if err2 != nil {
 		log.Fatal(err2)
 	}
-	return buff.String()
 	if len(output) == 0 {
 		log.Printf("Error: Empty SSH output for %s\n", addr)
 	}
+	return string(output)
 }
