@@ -22,14 +22,19 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 	}
 
 	// Filter all unreachable switches out
-	var reachableSwitchList []models.NetworkSwitch
-	for _, networkSwitch := range *switchInventory {
-		if networkSwitch.Reachable {
-			reachableSwitchList = append(reachableSwitchList, networkSwitch)
+	var reachableSwitchList []*models.NetworkSwitch
+	//for _, networkSwitch := range *switchInventory {
+	//	if networkSwitch.Reachable {
+	//		reachableSwitchList = append(reachableSwitchList, &networkSwitch)
+	//	}
+	//}
+	for i := 0; i < len(*switchInventory); i++ {
+		if (*switchInventory)[i].Reachable {
+			reachableSwitchList = append(reachableSwitchList, &(*switchInventory)[i])
 		}
 	}
 
-	jobs := make(chan models.NetworkSwitch, len(reachableSwitchList))
+	jobs := make(chan *models.NetworkSwitch, len(reachableSwitchList))
 	results := make(chan map[string]models.EthInterface, len(reachableSwitchList))
 	command := "show run | begin interface"
 	for i := 0; i < config.AppConfig.SSH.MaxGoRoutines; i++ {
@@ -41,19 +46,22 @@ func fetchEthIntConfig(switchInventory *[]models.NetworkSwitch) {
 	close(jobs)
 
 	for i := 0; i < len(reachableSwitchList); i++ {
-		(*switchInventory)[i].EthInterfaces = <-results
+		//(*switchInventory)[i].EthInterfaces = <-results
 		//fmt.Println((*switchInventory)[i].EthInterfaces)
+		<-results
 	}
 	close(results)
 
 	saveAsJson(switchInventory)
 }
 
-func worker2(jobs <-chan models.NetworkSwitch, command string, results chan<- map[string]models.EthInterface) {
+func worker2(jobs <-chan *models.NetworkSwitch, command string, results chan<- map[string]models.EthInterface) {
 	for networkSwitch := range jobs {
-		rawOutput := sendSingleShowCommand(command, networkSwitch)
-		results <- parseIntEthConfig(rawOutput)
-
+		rawOutput := sendSingleShowCommand(command, *networkSwitch)
+		//fmt.Printf("===================\nrawOutput: %s\n", rawOutput)
+		parsedIntEthConfig := parseIntEthConfig(rawOutput)
+		networkSwitch.EthInterfaces = parsedIntEthConfig
+		results <- parsedIntEthConfig
 	}
 }
 
