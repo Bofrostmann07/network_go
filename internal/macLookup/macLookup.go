@@ -27,13 +27,13 @@ func DoLookUp() {
 	log.Println("Started MAC address lookup tool")
 	ieeeRegistry := checkIeeeRegistry()
 	InputText := userInput()
-	MacAddressList := parseMacAddresses(InputText)
-	searchMac := removeDuplicateValues(MacAddressList)
-	searchQuery := newSearchMac(searchMac)
+	parsedMACAddressList := parseMacAddresses(InputText)
+	searchQuery := formatMACAddresses(parsedMACAddressList)
 	searchIeeeRegistry(&searchQuery, ieeeRegistry)
 	printResult(&searchQuery)
 }
 
+//Download IEEE MAC registry if it`s missing or outdated
 func checkIeeeRegistry() (ieeeRegistry map[string]string) {
 	file, err := os.OpenFile(pathIeeeRegister, os.O_RDWR, 0755)
 	if os.IsNotExist(err) {
@@ -68,8 +68,9 @@ func checkIeeeRegistry() (ieeeRegistry map[string]string) {
 	return ieeeRegistry
 }
 
+//Multi-line user input
 func userInput() (lines []string) {
-	fmt.Println("Enter Lines:")
+	fmt.Println("Complete input by entering 'exit' in new line.\nEnter Lines:")
 	scn := bufio.NewScanner(os.Stdin)
 	for {
 		for scn.Scan() {
@@ -97,16 +98,21 @@ func userInput() (lines []string) {
 	return lines
 }
 
-func parseMacAddresses(InputText []string) (MacAddressList []string) {
+//Parse out all the MAC addresses from user input
+func parseMacAddresses(InputText []string) (parsedMACAddressList []string) {
 	pattern := regexp.MustCompile(`(?:[[:xdigit:]]{2}[-:.]){5}[[:xdigit:]]{2}|(?:[[:xdigit:]]{4}.){2}[[:xdigit:]]{4}|[[:xdigit:]]{12}`)
 
 	for _, line := range InputText {
 		MacAddress := pattern.FindAllString(line, -1)
-		MacAddressList = append(MacAddressList, MacAddress...)
+		parsedMACAddressList = append(parsedMACAddressList, MacAddress...)
 	}
-	return MacAddressList
+
+	parsedMACAddressList = removeDuplicateValues(parsedMACAddressList)
+
+	return parsedMACAddressList
 }
 
+//Remove all duplicate MAC addresses out of user input list
 func removeDuplicateValues(inputSlice []string) (uniqueSlice []string) {
 	keys := make(map[string]bool)
 
@@ -121,7 +127,9 @@ func removeDuplicateValues(inputSlice []string) (uniqueSlice []string) {
 	return uniqueSlice
 }
 
+//Download IEEE MAC list and format it to JSON
 func getIeeeMacList() (ieeeRegistry map[string]string) {
+	//Download IEEE MAC list
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", "https://standards-oui.ieee.org/oui/oui.txt", nil)
 	if err != nil {
@@ -138,6 +146,7 @@ func getIeeeMacList() (ieeeRegistry map[string]string) {
 	}
 	//fmt.Printf("%s\n", bodyText)
 
+	//Format IEEE MAC list to JSON oui:vendor
 	ieeeRegistry = make(map[string]string)
 	pattern := regexp.MustCompile(`([[:xdigit:]]{6})\s+\(.*\)\s+(.*)`)
 	output := pattern.FindAllStringSubmatch(string(bodyText), -1)
@@ -146,14 +155,13 @@ func getIeeeMacList() (ieeeRegistry map[string]string) {
 		formattedVendor := strings.TrimSuffix(element[2], "\r")
 		ieeeRegistry[element[1]] = formattedVendor
 	}
-	//fmt.Println(ieeeRegistry)
 
 	jsonString, _ := json.Marshal(ieeeRegistry)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//fmt.Println(string(jsonString))
 
+	//Write IEEE MAC list as JSON
 	file, err := os.Create(pathIeeeRegister)
 	if err != nil {
 		log.Fatal(err)
@@ -169,6 +177,7 @@ func getIeeeMacList() (ieeeRegistry map[string]string) {
 	return ieeeRegistry
 }
 
+//Open and read IEEE MAC list
 func readIeeeRegistry() (ieeeRegistry map[string]string) {
 	jsonFile, err := os.Open(pathIeeeRegister)
 	if err != nil {
@@ -181,10 +190,10 @@ func readIeeeRegistry() (ieeeRegistry map[string]string) {
 	return ieeeRegistry
 }
 
-func newSearchMac(macAddress []string) (searchQuery []searchedMac) {
-	searchQuery = make([]searchedMac, len(macAddress))
+func formatMACAddresses(parsedMACAddressList []string) (searchQuery []searchedMac) {
+	searchQuery = make([]searchedMac, len(parsedMACAddressList))
 	pattern := regexp.MustCompile(`[-:.]`)
-	for i, element := range macAddress {
+	for i, element := range parsedMACAddressList {
 		searchQuery[i].sourceMac = element
 		element = pattern.ReplaceAllString(element, "")
 		element = strings.ToUpper(element)
@@ -213,4 +222,3 @@ func printResult(searchQuery *[]searchedMac) {
 		log.Printf("%d - %s: %s", i, element.sourceMac, element.vendor)
 	}
 }
-
